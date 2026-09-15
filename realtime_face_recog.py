@@ -6,19 +6,24 @@ from PIL import Image
 
 # Relations dictionary
 relation_map = {
-    "yaseen": "brother of suhana",
-    "nisa": "mother of suhana",
-    "sulu": "sister of suhana",
-    "sulfi": "father of suhana",
-    "fariyal": "niece of suhana",
+    "Sajeela": "Mother of farha",
+    "Ali": "Father of farha",
+    "Fathima": "sister of farha",
+
 }
 
 # Load model
 checkpoint = torch.load("face_model.pth", map_location="cpu")
 classes = checkpoint["classes"]
 
-model = models.resnet18(pretrained=False)
-model.fc = nn.Linear(model.fc.in_features, len(classes))
+# Define model to match training
+model = models.resnet18(weights=None)   # use new API instead of pretrained=False
+model.fc = nn.Sequential(
+    nn.Identity(),  # this becomes fc.0
+    nn.Linear(model.fc.in_features, len(classes))  # this becomes fc.1
+)
+
+# Load trained weights
 model.load_state_dict(checkpoint["model"])
 model.eval()
 
@@ -34,11 +39,10 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fronta
 
 # Relation → text color (BGR format)
 color_map = {
-    "Mother of suhana": (255, 0, 255),   # Pink
-    "Father of suhana": (0, 255, 255),   # Yellow
-    "sister of suhana": (255, 255, 0),   # Cyan
-    "brother of suhana": (0, 255, 0),     
-    "niece of suhana"  : (0,255,0)      # Green
+    "Mother of farha": (255, 0, 255),   # Pink
+    "Father of farha": (0, 255, 255),   # Yellow
+    "sister of farha": (255, 255, 0),   # Cyan
+   
 }
 
 cap = cv2.VideoCapture(0)
